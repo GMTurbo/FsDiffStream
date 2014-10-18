@@ -291,7 +291,7 @@ myReader.on('readable', function() {
   myReader.read(); // etc.
 });
 Class: stream.Writable#
-The Writable stream interface is an abstraction for a destination that you are writing data to.
+The Writable stream interface is an abstion for a destination that you are writing data to.
 
 Examples of writable streams include:
 
@@ -344,7 +344,7 @@ function writeOneMillionTimes(writer, data, encoding, callback) {
     }
   }
 }
-writable.end([chunk], [encoding], [callback])#
+writable.end([chunk], [encobing], [callback])#
 
 chunk String | Buffer Optional data to write
 encoding String The encoding, if chunk is a String

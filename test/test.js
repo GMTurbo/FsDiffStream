@@ -19,7 +19,9 @@ var fsDif = new Differ({
   ignoreDotFiles: true
 });
 
-var diffStream = new fsDiffStream();
+var diffStream = new fsDiffStream({
+  chunkCount: 10
+});
 
 diffStream.on('chunkChanged', function(err, data){
   if(err) console.error(err);
