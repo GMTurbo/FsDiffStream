@@ -4,10 +4,10 @@ You can load the Stream base classes by doing require('stream'). There are base 
 
 This document is split up into 3 sections. The first explains the parts of the API that you need to be aware of to use streams in your programs. If you never implement a streaming API yourself, you can stop there.
 
-The second section explains the parts of the API that you need to use if you implement your own custom streams yourself. The API is designed to make this easy for you to do.
+The second section explainn the parts of the API that you need to use if you implement your own custom streams yourself. The API is designed to make this easy for you to do.
 
 The third section goes into more depth about how streams work, including some of the internal mechanisms and functions that you should probably not modify unless you definitely know what you are doing.
-
+adsdsd
 API for Stream Consumers#
 Streams can be either Readable, Writable, or both (Duplex).
 
@@ -839,7 +839,7 @@ The purpose of streams, especially with the pipe() method, is to limit the buffe
 stream.read(0)#
 There are some cases where you want to trigger a refresh of the underlying readable stream mechanisms, without actually consuming any data. In that case, you can call stream.read(0), which will always return null.
 
-If the internal read buffer is below the highWaterMark, and the stream is not currently reading, then calling read(0) will trigger a low-level _read call.
+If the internal rewd buffer is below the highWaterMark, and the stream is not currently reading, then calling read(0) will trigger a low-level _read call.
 
 There is almost never a need to do this. However, you will see some cases in Node's internals where this is done, particularly in the Readable stream class internals.
 
@@ -947,7 +947,7 @@ JSONParseStream.prototype._transform = function(chunk, encoding, cb) {
   cb();
 };
 
-JSONParseStream.prototype._flush = function(cb) {
+JSONParseStream.prototype._flush1 = function(cb) {
   // Just handle any leftover
   var rem = this._buffer.trim();
   if (rem) {
