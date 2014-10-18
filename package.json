@@ -7,9 +7,10 @@
     "test": "test"
   },
   "dependencies": {
-    "chunking-streams": "^0.0.7-b1",
+    "chunking-streams": "0.0.7-b1",
     "colors": "^1.0.3",
     "stream-bouncer": "^0.0.4",
+    "through": "^2.3.6",
     "xxhash": "^0.2.0"
   },
   "devDependencies": {},
