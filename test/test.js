@@ -43,15 +43,16 @@ var orderFile = function(count){
 diffStream.on('resize', function(err, data){
   if(err) console.error(err);
   orderFile(data.count);
-  outputFile.read(offset, chunk.data, function(err) {
-    if(err) console.error(err);
-  });
+  debugger;
+  // outputFile.read(offset, chunk.data, function(err) {
+  //   if(err) console.error(err);
+  // });
 });
 
 diffStream.on('chunkChanged', function(err, chunk){
   if(err) console.error(err);
   console.log('chunkChanged', chunk);
-  offset = chunk.id * chunk.data.length;
+  offset = chunk.id * chunk.targetChunkSize;
   outputFile.write(offset, chunk.data, function(err) {
     if(err) console.error(err);
   });
@@ -69,7 +70,7 @@ diffStream.on('chunkRemoved', function(err, data){
 diffStream.on('uniqueChunk', function(err, chunk){
   if(err) console.error(err);
   console.log('uniqueChunk', chunk);
-  offset = chunk.id * chunk.data.length;
+  offset = chunk.id * chunk.targetChunkSize;
   outputFile.write(offset, chunk.data, function(err) {
     if(err) console.error(err);
   });
