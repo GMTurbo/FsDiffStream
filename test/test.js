@@ -17,17 +17,17 @@ var fsDif = new Differ({
 });
 
 var diffStream = new fsDiffStream({
-  chunkCount: 5
+  chunkSize: 512
 });
 
 var outputFile,
   offset;
 
-diffStream.on('chunkChanged', function(err, data){
+diffStream.on('chunkChanged', function(err, chunk){
   if(err) console.error(err);
-  console.log('chunkChanged', data);
-  offset = data.id * data.data.length;
-  outputFile.write(offset, data.data, function(err) {
+  console.log('chunkChanged', chunk);
+  offset = chunk.id * chunk.data.length;
+  outputFile.write(offset, chunk.data, function(err) {
     if(err) console.error(err);
   });
 });
@@ -41,11 +41,11 @@ diffStream.on('chunkRemoved', function(err, data){
   // });
 });
 
-diffStream.on('uniqueChunk', function(err, data){
+diffStream.on('uniqueChunk', function(err, chunk){
   if(err) console.error(err);
-  console.log('uniqueChunk', data);
-  offset = data.id * data.data.length;
-  outputFile.write(offset, data.data, function(err) {
+  console.log('uniqueChunk', chunk);
+  offset = chunk.id * chunk.data.length;
+  outputFile.write(offset, chunk.data, function(err) {
     if(err) console.error(err);
   });
 });
