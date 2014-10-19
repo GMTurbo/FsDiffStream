@@ -1,12 +1,14 @@
 var chunkingStreams = require('chunking-streams'),
   fs = require('fs'),
+  path = require('path'),
   xxhash = require('xxhash'),
   StreamBouncer = require('stream-bouncer'),
   Differ = require('../../fs-dif/lib/fs-dif'),
   colors = require('colors');
-  fsDiffStream = require('../../FsDiffStream/lib/index.js')
+  fsDiffStream = require('../../FsDiffStream/lib/index.js'),
+  randomAccessFile = require('random-access-file');
 
-var osx = './test/';
+var osx = './test/data';
 var dir = osx;
 
 //https://github.com/thlorenz/readdirp#filters
@@ -20,17 +22,37 @@ var fsDif = new Differ({
 });
 
 var diffStream = new fsDiffStream({
-  chunkCount: 10
+  chunkSize: 256
 });
+
+var outputFile,
+  offset;
 
 diffStream.on('chunkChanged', function(err, data){
   if(err) console.error(err);
   console.log('chunkChanged', data);
+  offset = data.id * data.data.length;
+  outputFile.write(offset, data.data, function(err) {
+    if(err) console.error(err);
+  });
+});
+
+diffStream.on('chunkRemoved', function(err, data){
+  if(err) console.error(err);
+  console.log('chunkRemoved', data);
+  offset = data.id * data.data.length;
+  // outputFile.write(data.data.offset || 0, data.data, function(err) {
+  //   if(err) console.error(err);
+  // });
 });
 
 diffStream.on('uniqueChunk', function(err, data){
   if(err) console.error(err);
   console.log('uniqueChunk', data);
+  offset = data.id * data.data.length;
+  outputFile.write(offset, data.data, function(err) {
+    if(err) console.error(err);
+  });
 });
 
 fsDif.on('ready', function() {
@@ -51,6 +73,7 @@ fsDif.on('ready', function() {
     //console.log('moved', data);
     if (err)
       process.exit();
+    outputFile = randomAccessFile(path.basename(data.fileName));
     diffStream.compare(data.fileName);
   });
 
