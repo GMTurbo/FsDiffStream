@@ -1,10 +1,6 @@
-var chunkingStreams = require('chunking-streams'),
-  fs = require('fs'),
+var fs = require('fs'),
   path = require('path'),
-  xxhash = require('xxhash'),
-  StreamBouncer = require('stream-bouncer'),
   Differ = require('../../fs-dif/lib/fs-dif'),
-  colors = require('colors');
   fsDiffStream = require('../../FsDiffStream/lib/index.js'),
   randomAccessFile = require('random-access-file');
 
@@ -16,13 +12,12 @@ var dir = osx;
 
 var fsDif = new Differ({
   dirToWatch: dir, //REQUIRED: directory to watch
-  debugOutput: true, //turn on verbose output logging,
   directoryFilter: ['!*modules'],
   ignoreDotFiles: true
 });
 
 var diffStream = new fsDiffStream({
-  chunkSize: 256
+  chunkCount: 5
 });
 
 var outputFile,
@@ -32,15 +27,15 @@ diffStream.on('chunkChanged', function(err, data){
   if(err) console.error(err);
   console.log('chunkChanged', data);
   offset = data.id * data.data.length;
-  outputFile.write(offset, data.data, function(err) {
-    if(err) console.error(err);
-  });
+  // outputFile.write(offset, data.data, function(err) {
+  //   if(err) console.error(err);
+  // });
 });
 
 diffStream.on('chunkRemoved', function(err, data){
   if(err) console.error(err);
   console.log('chunkRemoved', data);
-  offset = data.id * data.data.length;
+  //offset = data.id * data.data.length;
   // outputFile.write(data.data.offset || 0, data.data, function(err) {
   //   if(err) console.error(err);
   // });
@@ -61,18 +56,22 @@ fsDif.on('ready', function() {
 
   fsDif.beginWatch();
 
-  fsDif.on('renamed', function(err, data) {
-    //console.log('renamed', data);
+  fsDif.on('created', function(err, data) {
+    console.log('created', data);
   });
 
-  fsDif.on('moved', function(err, data) {
-    //console.log('moved', data);
+  fsDif.on('exists', function(err, data) {
+    console.log('exists', data);
   });
 
   fsDif.on('changed', function(err, data) {
     //console.log('moved', data);
     if (err)
       process.exit();
+
+    if(outputFile)
+      outputFile.close();
+
     outputFile = randomAccessFile(path.basename(data.fileName));
     diffStream.compare(data.fileName);
   });
