@@ -27,9 +27,9 @@ diffStream.on('chunkChanged', function(err, data){
   if(err) console.error(err);
   console.log('chunkChanged', data);
   offset = data.id * data.data.length;
-  // outputFile.write(offset, data.data, function(err) {
-  //   if(err) console.error(err);
-  // });
+  outputFile.write(offset, data.data, function(err) {
+    if(err) console.error(err);
+  });
 });
 
 diffStream.on('chunkRemoved', function(err, data){
