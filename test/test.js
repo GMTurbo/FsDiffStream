@@ -16,12 +16,37 @@ var fsDif = new Differ({
   ignoreDotFiles: true
 });
 
+var chunkSize = 4096;
 var diffStream = new fsDiffStream({
-  chunkSize: 512
+  chunkSize: chunkSize
 });
 
 var outputFile,
   offset;
+
+var orderFile = function(count){
+
+  var offset;
+
+  for(var i = 0 ; i < count; i++){
+    offset = count * chunkSize;
+    outputFile.read(offset, chunkSize, function(err, buffer) {
+      if(err) console.error(err);
+      outputFile.write(offset, buffer, function(err) {
+        if(err) console.error(err);
+      });
+    });
+
+  }
+};
+
+diffStream.on('resize', function(err, data){
+  if(err) console.error(err);
+  orderFile(data.count);
+  outputFile.read(offset, chunk.data, function(err) {
+    if(err) console.error(err);
+  });
+});
 
 diffStream.on('chunkChanged', function(err, chunk){
   if(err) console.error(err);
