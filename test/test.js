@@ -2,7 +2,7 @@ var fs = require('fs'),
   path = require('path'),
   Differ = require('../../fs-dif/lib/fs-dif'),
   fsDiffStream = require('../../FsDiffStream/lib/index.js'),
-  randomAccessFile = require('random-access-file')
+  randomAccessFile = require('random-access-file'),
   randomAccessRemove = require('random-access-remove');
 
 var osx = './test/data';
@@ -17,7 +17,7 @@ var fsDif = new Differ({
   ignoreDotFiles: true
 });
 
-var chunkSize = 4096;
+var chunkSize = 1024 * 10;
 
 var diffStream = new fsDiffStream({
   chunkSize: chunkSize
@@ -27,20 +27,24 @@ var outputFile,
   offset,
   rar = new randomAccessRemove();
 
-var orderFile = function(filename, blockCount, oldCount){
+var orderFile = function(filename, blockCount, oldCount) {
 
-  if(oldCount > blockCount){
+  if (oldCount > blockCount) {
 
-    rar.remove('test.txt', oldCount, blockCount, function(err) {
+    rar.remove(
+      filename,
+      blockCount * chunkSize,
+      (oldCount - blockCount) * chunkSize,
+      function(err) {
       if (err)
         console.error(err);
     });
+
   }
-  
 };
 
-diffStream.on('fileResize', function(err, data){
-  if(err) console.error(err);
+diffStream.on('fileResize', function(err, data) {
+  if (err) console.error(err);
   debugger;
   orderFile(data.fileName, data.chunkCount, data.prevChunkCount);
   // outputFile.read(offset, chunk.data, function(err) {
@@ -48,17 +52,17 @@ diffStream.on('fileResize', function(err, data){
   // });
 });
 
-diffStream.on('chunkChanged', function(err, chunk){
-  if(err) console.error(err);
+diffStream.on('chunkChanged', function(err, chunk) {
+  if (err) console.error(err);
   console.log('chunkChanged', chunk);
   offset = chunk.id * chunk.targetChunkSize;
   outputFile.write(offset, chunk.data, function(err) {
-    if(err) console.error(err);
+    if (err) console.error(err);
   });
 });
 
-diffStream.on('chunkRemoved', function(err, data){
-  if(err) console.error(err);
+diffStream.on('chunkRemoved', function(err, data) {
+  if (err) console.error(err);
   console.log('chunkRemoved', data);
   //offset = data.id * data.data.length;
   // outputFile.write(data.data.offset || 0, data.data, function(err) {
@@ -66,12 +70,12 @@ diffStream.on('chunkRemoved', function(err, data){
   // });
 });
 
-diffStream.on('uniqueChunk', function(err, chunk){
-  if(err) console.error(err);
+diffStream.on('uniqueChunk', function(err, chunk) {
+  if (err) console.error(err);
   console.log('uniqueChunk', chunk);
   offset = chunk.id * chunk.targetChunkSize;
   outputFile.write(offset, chunk.data, function(err) {
-    if(err) console.error(err);
+    if (err) console.error(err);
   });
 });
 
@@ -99,7 +103,7 @@ fsDif.on('ready', function() {
     if (err)
       process.exit();
 
-    if(outputFile)
+    if (outputFile)
       outputFile.close();
 
     outputFile = randomAccessFile(path.basename(data.fileName));
