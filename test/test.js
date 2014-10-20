@@ -2,7 +2,8 @@ var fs = require('fs'),
   path = require('path'),
   Differ = require('../../fs-dif/lib/fs-dif'),
   fsDiffStream = require('../../FsDiffStream/lib/index.js'),
-  randomAccessFile = require('random-access-file');
+  randomAccessFile = require('random-access-file')
+  randomAccessRemove = require('random-access-remove');
 
 var osx = './test/data';
 var dir = osx;
@@ -17,33 +18,31 @@ var fsDif = new Differ({
 });
 
 var chunkSize = 4096;
+
 var diffStream = new fsDiffStream({
   chunkSize: chunkSize
 });
 
 var outputFile,
-  offset;
+  offset,
+  rar = new randomAccessRemove();
 
-var orderFile = function(count){
+var orderFile = function(filename, blockCount, oldCount){
 
-  var offset;
+  if(oldCount > blockCount){
 
-  for(var i = 0 ; i < count; i++){
-    offset = count * chunkSize;
-    outputFile.read(offset, chunkSize, function(err, buffer) {
-      if(err) console.error(err);
-      outputFile.write(offset, buffer, function(err) {
-        if(err) console.error(err);
-      });
+    rar.remove('test.txt', oldCount, blockCount, function(err) {
+      if (err)
+        console.error(err);
     });
-
   }
+  
 };
 
-diffStream.on('resize', function(err, data){
+diffStream.on('fileResize', function(err, data){
   if(err) console.error(err);
-  orderFile(data.count);
   debugger;
+  orderFile(data.fileName, data.chunkCount, data.prevChunkCount);
   // outputFile.read(offset, chunk.data, function(err) {
   //   if(err) console.error(err);
   // });
@@ -81,6 +80,11 @@ fsDif.on('ready', function() {
   console.log('fsDif ready to rock');
 
   fsDif.beginWatch();
+
+  fsDif.on('removed', function(err, data) {
+    console.log('removed', data);
+    diffStream.remove(data.fileName);
+  });
 
   fsDif.on('created', function(err, data) {
     console.log('created', data);
