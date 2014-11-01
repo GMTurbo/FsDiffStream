@@ -58,12 +58,8 @@ var orderFile = function(filename, blockCount, oldCount) {
 };
 
 diffStream.on('fileResize', function(err, data) {
-  if (err) console.error(err);
-  debugger;
-  //orderFile(path.basename(data.fileName), data.chunkCount, data.prevChunkCount);
-  // outputFile.read(offset, chunk.data, function(err) {
-  //   if(err) console.error(err);
-  // });
+  if (err)
+    console.error(err);
 });
 
 diffStream.on('chunkChanged', function(err, chunk) {
