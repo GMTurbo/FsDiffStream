@@ -58,21 +58,20 @@ var orderFile = function(filename, blockCount, oldCount) {
 };
 
 diffStream.on('fileResize', function(err, data) {
-  if (err)
-    console.error(err);
+  err && console.error(err);
 });
 
 diffStream.on('chunkChanged', function(err, chunk) {
-  if (err) console.error(err);
+  err && console.error(err);
   //console.log('chunkChanged', chunk);
   offset = chunk.id * chunk.targetChunkSize;
   outputFile.write(offset, chunk.data, function(err) {
-    if (err) console.error(err);
+    err && console.error(err);
   });
 });
 
 diffStream.on('chunkRemoved', function(err, data) {
-  if (err) console.error(err);
+  err && console.error(err);
   console.log('chunkRemoved', data);
   //offset = data.id * data.data.length;
   // outputFile.write(data.data.offset || 0, data.data, function(err) {
@@ -86,7 +85,7 @@ diffStream.on('uniqueChunk', function(err, chunk) {
   //console.log('uniqueChunk', chunk);
   offset = chunk.id * chunk.targetChunkSize;
   outputFile.write(offset, chunk.data, function(err) {
-    if (err) console.error(err);
+    err && console.error(err);
   });
 });
 
@@ -111,11 +110,10 @@ fsDif.on('ready', function() {
 
   fsDif.on('changed', function(err, data) {
     console.log('changed', data);
-    if (err)
-      process.exit();
+    err && process.exit();
 
-    var interval = setInterval(function(){
-      if(writing)
+    var interval = setInterval(function() {
+      if (writing)
         return;
       clearInterval(interval);
       handleChange(data);
@@ -123,22 +121,22 @@ fsDif.on('ready', function() {
 
   });
 
-  var handleChange = function(data){
+  var handleChange = function(data) {
     if (outputFile) {
       outputFile.close(function() {
         outputFile = randomAccessFile(path.basename(data.fileName));
-        diffStream.compare(data.fileName, function(err, resized){
+        diffStream.compare(data.fileName, function(err, resized) {
           console.log('dif finished');
-          if(resized){
+          if (resized) {
             orderFile(path.basename(resized.fileName), resized.chunkCount, resized.prevChunkCount);
           }
         });
       });
     } else {
       outputFile = randomAccessFile(path.basename(data.fileName));
-      diffStream.compare(data.fileName, function(err, resized){
+      diffStream.compare(data.fileName, function(err, resized) {
         console.log('dif finished');
-        if(resized){
+        if (resized) {
           orderFile(path.basename(resized.fileName), resized.chunkCount, resized.prevChunkCount);
         }
       });
